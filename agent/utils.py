@@ -51,19 +51,28 @@ def find_cpp_files(root_path: Path, extensions: List[str], exclude_patterns: Lis
     """Find all C++ files in a directory tree"""
     cpp_files = []
     
-    for ext in extensions:
-        for file_path in root_path.rglob(f"*{ext}"):
-            # Check exclude patterns
-            should_exclude = False
-            file_str = str(file_path)
-            for pattern in exclude_patterns:
-                # Simple pattern matching (can be enhanced with fnmatch)
-                if pattern.replace("**", "").replace("*", "") in file_str:
-                    should_exclude = True
-                    break
-            
-            if not should_exclude and file_path.is_file():
-                cpp_files.append(file_path)
+    # Normalize extensions (ensure they start with .)
+    normalized_extensions = [ext if ext.startswith('.') else f'.{ext}' for ext in extensions]
+    
+    for file_path in root_path.rglob("*"):
+        if not file_path.is_file():
+            continue
+        
+        # Strictly check file extension
+        if file_path.suffix.lower() not in normalized_extensions:
+            continue
+        
+        # Check exclude patterns
+        should_exclude = False
+        file_str = str(file_path)
+        for pattern in exclude_patterns:
+            # Simple pattern matching (can be enhanced with fnmatch)
+            if pattern.replace("**", "").replace("*", "") in file_str:
+                should_exclude = True
+                break
+        
+        if not should_exclude:
+            cpp_files.append(file_path)
     
     return sorted(cpp_files)
 

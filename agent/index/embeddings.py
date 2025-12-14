@@ -18,7 +18,8 @@ class EmbeddingGenerator:
     def generate_embedding(self, text: str) -> Optional[List[float]]:
         """Generate embedding for a single text"""
         try:
-            url = f"{self.base_url}/api/embeddings"
+            # Ollama uses /api/embed (singular) not /api/embeddings
+            url = f"{self.base_url}/api/embed"
             payload = {
                 "model": self.model_name,
                 "prompt": text

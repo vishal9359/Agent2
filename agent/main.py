@@ -110,48 +110,62 @@ class CppFlowchartAgent:
         logger.info("Parsing files and extracting ASTs...")
         for file_path in tqdm(cpp_files, desc="Parsing files"):
             try:
+                # Double-check file extension to ensure it's a C++ file
+                if file_path.suffix.lower() not in [ext.lower() for ext in self.config.cpp_extensions]:
+                    logger.debug(f"Skipping non-C++ file: {file_path}")
+                    continue
+                
                 # Extract functions
                 functions = self.ast_extractor.extract_functions(file_path)
+                
+                if not functions:
+                    # No functions found, skip this file
+                    continue
                 
                 for func_info in functions:
                     func_name = func_info.get("name")
                     if not func_name:
                         continue
                     
-                    # Get module
-                    module_name = self.module_analyzer.get_module_for_file(file_path)
-                    
-                    # Add to call graph
-                    self.call_graph_builder.add_function(
-                        func_name,
-                        file_path,
-                        class_name=func_info.get("class_name"),
-                        namespace=func_info.get("namespace"),
-                        is_virtual=func_info.get("is_virtual", False),
-                        is_static=func_info.get("is_static", False)
-                    )
-                    
-                    # Parse AST for this function
-                    ast = self.ast_extractor.parse_file(file_path)
-                    if ast:
-                        # Build CFG
-                        cfg = self.cfg_builder.build_cfg_from_ast(
-                            ast, func_name, file_path
-                        )
+                    try:
+                        # Get module
+                        module_name = self.module_analyzer.get_module_for_file(file_path)
                         
-                        # Transform to IR
-                        func_ir = self.ir_transformer.transform_function(
-                            {"function": func_info, **ast},
-                            cfg,
+                        # Add to call graph
+                        self.call_graph_builder.add_function(
+                            func_name,
                             file_path,
+                            class_name=func_info.get("class_name"),
                             namespace=func_info.get("namespace"),
-                            class_name=func_info.get("class_name")
+                            is_virtual=func_info.get("is_virtual", False),
+                            is_static=func_info.get("is_static", False)
                         )
                         
-                        # Extract calls
-                        self.call_graph_builder.extract_calls_from_ast(
-                            ast, func_name, file_path
-                        )
+                        # Parse AST for this function
+                        ast = self.ast_extractor.parse_file(file_path)
+                        if ast:
+                            # Build CFG
+                            cfg = self.cfg_builder.build_cfg_from_ast(
+                                ast, func_name, file_path
+                            )
+                            
+                            # Transform to IR
+                            func_ir = self.ir_transformer.transform_function(
+                                {"function": func_info, **ast},
+                                cfg,
+                                file_path,
+                                namespace=func_info.get("namespace"),
+                                class_name=func_info.get("class_name")
+                            )
+                            
+                            # Extract calls
+                            self.call_graph_builder.extract_calls_from_ast(
+                                ast, func_name, file_path
+                            )
+                    except Exception as func_error:
+                        # Log but continue with other functions
+                        logger.debug(f"Failed to process function {func_name} in {file_path}: {func_error}")
+                        continue
             except Exception as e:
                 logger.warning(f"Failed to process {file_path}: {e}")
         
