@@ -3,7 +3,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import Dict, List, Set, Optional, Tuple
+from typing import Dict, List, Set, Optional, Tuple, Any
 from collections import defaultdict
 import networkx as nx
 
@@ -17,7 +17,7 @@ class ModuleAnalyzer:
     
     def __init__(self, project_root: Path):
         self.project_root = project_root
-        self.modules: Dict[str, Dict[str, any]] = {}
+        self.modules: Dict[str, Dict[str, Any]] = {}
         self.module_dependencies = nx.DiGraph()
         self.file_to_module: Dict[str, str] = {}
     
@@ -56,7 +56,7 @@ class ModuleAnalyzer:
         for module_name, module_data in self.modules.items():
             self._analyze_module_dependencies(module_name, module_data)
     
-    def _analyze_module_dependencies(self, module_name: str, module_data: Dict[str, any]) -> None:
+    def _analyze_module_dependencies(self, module_name: str, module_data: Dict[str, Any]) -> None:
         """Analyze dependencies for a module"""
         includes = set()
         
@@ -107,7 +107,7 @@ class ModuleAnalyzer:
         # Unknown dependency
         return None
     
-    def get_module(self, module_name: str) -> Optional[Dict[str, any]]:
+    def get_module(self, module_name: str) -> Optional[Dict[str, Any]]:
         """Get module information"""
         return self.modules.get(module_name)
     
@@ -131,7 +131,7 @@ class ModuleAnalyzer:
         """Get module dependency graph"""
         return self.module_dependencies
     
-    def get_all_modules(self) -> Dict[str, Dict[str, any]]:
+    def get_all_modules(self) -> Dict[str, Dict[str, Any]]:
         """Get all modules"""
         return self.modules
     

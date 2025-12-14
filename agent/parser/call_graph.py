@@ -3,7 +3,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional
+from typing import Dict, List, Set, Tuple, Optional, Any
 from collections import defaultdict
 import networkx as nx
 
@@ -15,7 +15,7 @@ class CallGraphBuilder:
     
     def __init__(self):
         self.call_graph = nx.DiGraph()
-        self.function_locations: Dict[str, Dict[str, any]] = {}
+        self.function_locations: Dict[str, Dict[str, Any]] = {}
     
     def add_function(self, function_name: str, file_path: Path, 
                     class_name: Optional[str] = None, 
