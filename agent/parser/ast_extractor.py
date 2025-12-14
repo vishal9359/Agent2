@@ -21,9 +21,6 @@ class ASTExtractor:
                 import tree_sitter_cpp
                 self.language = Language(tree_sitter_cpp.language())
             except ImportError:
-                # Fallback: try to build from source
-                from tree_sitter import Language
-                import os
                 # This is a fallback - user should install tree-sitter-cpp
                 raise ImportError(
                     "tree-sitter-cpp not found. Install with: pip install tree-sitter-cpp"
